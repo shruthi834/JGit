@@ -193,4 +193,42 @@ public class JGitController {
 	        }
 		return "Reverting to previous commit successfully ";
 	}
+	@GetMapping("/listsFile")
+	public List<FileDetails> getFileList() {
+		List<FileDetails> fileDetailsList = new ArrayList<>();
+		 String repositoryPath = "D:\\git-repo-bookstore\\book-store-project";
+		 try(Repository repository = Git.open(new File(repositoryPath)).getRepository())  {
+			 	
+	            Git git = new Git(repository);
+			 	String folderPath="src/main/java/com/bittercode/model";
+			 	ObjectId headId = repository.resolve("HEAD");
+			 	RevWalk walk = new RevWalk(repository);
+			 	RevCommit commit = walk.parseCommit(headId);
+		        RevTree tree = commit.getTree();
+		        System.out.println("Having tree: " + tree);
+		        // now use a TreeWalk to iterate over all files in the Tree recursively
+		        // you can set Filters to narrow down the results if needed
+		        TreeWalk treeWalk = new TreeWalk(repository);
+		        treeWalk.addTree(tree);
+		        treeWalk.setRecursive(true);
+		        while (treeWalk.next()) {
+		        	String path = treeWalk.getPathString();
+		        	if (path.startsWith(folderPath)) {
+		        		FileDetails fileDetails = new FileDetails();
+		        		String fileName = treeWalk.getNameString();
+				        fileDetails.setUserName(commit.getAuthorIdent().getName());
+				        fileDetails.setMapName(fileName.substring(0,fileName.lastIndexOf('.')));
+				        fileDetails.setCreateDate(new Date(commit.getCommitTime() * 1000L));
+				        fileDetailsList.add(fileDetails);
+						
+		            }
+		        }
+			 	 
+                        
+	}
+		 catch (Exception e) {
+	            e.printStackTrace();
+	      }
+		 return fileDetailsList;
+	}
 }
