@@ -216,6 +216,7 @@ public class JGitController {
 		        	if (path.startsWith(folderPath)) {
 		        		FileDetails fileDetails = new FileDetails();
 		        		String fileName = treeWalk.getNameString();
+					fileDetails.setId(UUID.randomUUID().toString());
 				        fileDetails.setUserName(commit.getAuthorIdent().getName());
 				        fileDetails.setMapName(fileName.substring(0,fileName.lastIndexOf('.')));
 				        fileDetails.setCreateDate(new Date(commit.getCommitTime() * 1000L));
