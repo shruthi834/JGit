@@ -145,5 +145,35 @@ public class JGitController {
             e.printStackTrace();
         }
     }
+    @GetMapping("/fileContent")
+    public void getFileContent(@RequestParam String commitId) {
+        String repositoryPath = "D:\\git-repo-testing\\fileList";
+        try(Repository repository = Git.open(new File(repositoryPath)).getRepository()) {
+
+//            Git git = new Git(repository);
+            ObjectId commitObjectId = repository.resolve(commitId);
+            try (RevWalk revWalk = new RevWalk(repository)) {
+                RevCommit commit = revWalk.parseCommit(commitObjectId);
+                RevTree tree = commit.getTree();
+                CanonicalTreeParser treeParser = new CanonicalTreeParser();
+                try (ObjectReader objectReader = repository.newObjectReader()) {
+                    treeParser.reset(objectReader, tree.getId());
+
+                    while (!treeParser.eof()) {
+                        String path = treeParser.getEntryPathString();
+                        ObjectId objectId = treeParser.getEntryObjectId();
+                        byte[] bytes = objectReader.open(objectId).getBytes();
+                        String content = new String(bytes);
+                        System.out.println("File path: " + path);
+                        System.out.println("File content:\n" + content);
+                        treeParser.next();
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }
